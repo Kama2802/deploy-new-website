@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lenovo LOQ 15IRX9: X-Ray Performa dan Pendingin</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background-color:#0f172a;color:#e2e8f0;font-family:"Segoe UI",system-ui,sans-serif;background-image:linear-gradient(#1e293b66 1px,transparent 1px),linear-gradient(90deg,#1e293b66 1px,transparent 1px);background-size:28px 28px}
+.mono{font-family:ui-monospace,Consolas,monospace}
+.fan{transform-box:fill-box;transform-origin:center;animation:sp var(--fd,2s) linear infinite}
+.fl{stroke-dasharray:7 9;animation:da var(--fl,2s) linear infinite}
+.ring{transform-box:fill-box;transform-origin:center;animation:pg 1.8s ease-out infinite}
+.pu{animation:pu 1s ease-in-out infinite}
+.fi{animation:fi .3s ease-out}
+button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes da{to{stroke-dashoffset:-32}}
+@keyframes pg{from{transform:scale(.6);opacity:.9}to{transform:scale(1.9);opacity:0}}
+@keyframes pu{50%{opacity:.35}}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){.fan,.fl,.ring,.pu{animation-duration:14s}}
+</style></head>
+<body><div id="root"></div>
+<script>
+const{useState,useEffect}=React,h=React.createElement;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
+const heat=t=>{const k=clamp((t-40)/50,0,1),c=(a,b)=>Math.round(lerp(a,b,k));return`rgb(${c(34,249)},${c(211,115)},${c(238,22)})`};
+const IC={cpu:'M4 4h16v16H4z M9 9h6v6H9z M9 1v3 M15 1v3 M9 20v3 M15 20v3 M20 9h3 M20 14h3 M1 9h3 M1 14h3',zap:'M13 2 3 14h9l-1 8 10-12h-9z',wind:'M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2 M9.6 4.6A2 2 0 1 1 11 8H2 M12.6 19.4A2 2 0 1 0 14 16H2',gauge:'m12 14 4-4 M3.34 19a10 10 0 1 1 17.32 0'};
+const Ic=({d,c})=>h('svg',{width:16,height:16,viewBox:'0 0 24 24',fill:'none',stroke:c,strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'},h('path',{d}));
+const M={
+ quiet:{n:'Quiet',c:'#3b82f6',fan:.42,cw:35,gw:55,clk:3.3,i:0,d:'Kipas pelan, daya CPU dan GPU dibatasi. Senyap dan dingin.'},
+ balance:{n:'Balance (AI Engine+)',c:'#22d3ee',fan:.7,cw:55,gw:85,clk:4,i:1,d:'Chip LA1 AI membagi daya CPU dan GPU secara dinamis sesuai beban.'},
+ perf:{n:'Performance',c:'#f97316',fan:1,cw:75,gw:105,clk:4.6,i:2,d:'Kipas ganda maksimal, GPU hingga 105 W, CPU turbo penuh.'}};
+const L={
+ idle:{n:'Idle / Browsing',cu:.06,gu:.04,fl:.3,f:[144,144,144]},
+ render:{n:'3D Rendering',cu:.95,gu:.75,fl:.9,f:[34,48,62]},
+ game:{n:'AAA Gaming + DLSS',cu:.6,gu:1,fl:1,f:[66,94,122]}};
+const calc=(m,l)=>{const a=M[m],b=L[l],fan=a.fan*b.fl,cw=6+(a.cw-6)*b.cu,gw=4+(a.gw-4)*b.gu;
+ return{fan,rpm:fan*5000,cw,gw,ct:36+cw*(1-.3*fan),gt:33+gw*(.7-.25*fan),pc:.8+(a.clk-.8)*Math.min(1,.15+b.cu*1.2),fps:b.f[a.i],cu:b.cu,gu:b.gu}};
+const INFO={
+ cpu:{k:'CPU',t:'Intel Core i5-13450HX',c:'#0071C5',b:'Prosesor hybrid Raptor Lake-HX. Tugas berat seperti game dan render masuk ke 6 P-Core yang bisa turbo hingga 4.6 GHz, sedangkan 4 E-Core menampung tugas latar belakang agar P-Core tetap fokus.',s:['6 P-Core + 4 E-Core = 10 core / 16 thread','Daya dasar 55 W, turbo hingga 157 W','iGPU Intel UHD untuk jalur hemat daya']},
+ gpu:{k:'GPU',t:'NVIDIA GeForce RTX 4050 6GB GDDR6',c:'#76B900',b:'GPU arsitektur Ada Lovelace. Tensor Core generasi ke-4 menjalankan DLSS 3: upscaling AI plus Frame Generation yang menyisipkan frame buatan, sehingga FPS naik tanpa membebani shader.',s:['6 GB GDDR6, bus 96-bit','TGP hingga 105 W (termasuk Dynamic Boost)','Alur: geometri, raster/RT, Tensor (DLSS), Frame Gen, layar']},
+ la1:{k:'Chip LA1',t:'Lenovo LA1 AI Chip',c:'#22d3ee',b:'Chip AI khusus yang aktif di mode Balance (AI Engine+). Ia membaca beban kerja dan suhu, lalu memindahkan watt ke CPU atau GPU sesuai kebutuhan, termasuk mengatur kurva kipas.',s:['Aktif di mode Balance','Memantau beban, suhu, dan aplikasi yang berjalan','Game: daya condong ke GPU. Render: ke CPU']},
+ fan:{k:'Kipas',t:'Hyperchamber: Dua Kipas Turbo',c:'#f97316',b:'Dua kipas menarik udara dingin dari lubang di bawah, mengalirkannya lewat heat pipe tembaga dan sirip heatsink, lalu mendorong udara panas keluar lewat ventilasi belakang, jauh dari tangan di area keyboard.',s:['2 kipas dan heat pipe tembaga','Ruang udara bersama untuk CPU dan GPU','Udara panas keluar belakang']},
+ mux:{k:'MUX',t:'MUX Switch / Advanced Optimus',c:'#76B900',b:'Saat gaming, MUX Switch menghubungkan GPU langsung ke layar tanpa melewati iGPU, jadi latensi lebih rendah dan FPS lebih tinggi. Di luar gaming, jalur lewat iGPU (Optimus) menghemat daya.',s:['Layar 15.6 inci FHD 144 Hz','Gaming: GPU langsung ke layar','Hemat: GPU, iGPU, lalu layar']},
+ ram:{k:'RAM',t:'Memori DDR5 4800 MHz',c:'#38bdf8',b:'Dua slot SO-DIMM DDR5 berjalan dual-channel, melipatgandakan lebar jalur data antara CPU/iGPU dan memori.',s:['DDR5 4800 MT/s','Dual-channel, 2 slot SO-DIMM','Bandwidth teoretis sekitar 76.8 GB/s']},
+ ssd:{k:'SSD',t:'SSD PCIe Gen 4 NVMe',c:'#a78bfa',b:'Terhubung lewat jalur PCIe 4.0 x4 langsung ke CPU, sehingga loading game dan aset render jauh lebih cepat dibanding SATA.',s:['PCIe 4.0 x4, protokol NVMe','Kecepatan teoretis hingga sekitar 7 GB/s','Tergantung SSD yang terpasang']}};
+const PIPES=['M290 210V68','M315 210V68','M510 210V68','M535 210V68','M290 190H535'];
+
+function Diag({tel:t,mode,load,sel,pick}){
+ const a=M[mode],f=t.fan,mx=Math.max(t.ct,t.gt),hot=heat(mx),g=load==='game',bal=mode==='balance',hk=clamp((mx-40)/50,0,1);
+ const dd=(4.2-3.4*[.35,.7,1][a.i]*(.3+.7*Math.max(t.cu,t.gu))).toFixed(2);
+ const sp=(id,x,y,c)=>h('g',{key:id,style:{cursor:'pointer'},onClick:()=>pick(id)},h('circle',{cx:x,cy:y,r:9,fill:'#0f172a',stroke:sel===id?'#fff':c,strokeWidth:sel===id?2.5:1.5}),h('circle',{cx:x,cy:y,r:9,fill:'none',stroke:c,className:'ring'}),h('text',{x,y:y+4,textAnchor:'middle',fontSize:11,fill:c,fontWeight:700,style:{pointerEvents:'none'}},'i'));
+ const dots=(d,c,n,k)=>Array.from({length:n},(_,i)=>h('circle',{key:k+i,r:3,fill:c},h('animateMotion',{path:d,dur:dd+'s',begin:(-i*dd/n).toFixed(2)+'s',repeatCount:'indefinite'})));
+ const ln=(d,c,o,w,k)=>h('path',{key:k,d,fill:'none',stroke:c,strokeWidth:w,opacity:o});
+ const fan=(cx,cy,k)=>h('g',{key:k,style:{cursor:'pointer'},onClick:()=>pick('fan')},
+  h('g',{className:'fan'},h('circle',{cx,cy,r:48,fill:'#0b1220',stroke:a.c,strokeWidth:2}),...[0,1,2,3,4,5,6].map(i=>h('ellipse',{key:i,cx:cx+24,cy,rx:22,ry:8,fill:a.c,fillOpacity:.45,transform:`rotate(${i*360/7} ${cx} ${cy})`}))),
+  h('circle',{cx,cy,r:11,fill:'#1e293b',stroke:a.c}),
+  h('text',{x:cx,y:cy+66,textAnchor:'middle',fontSize:10,fill:'#94a3b8'},`Kipas turbo, ${Math.round(t.rpm/50)*50} rpm`));
+ const dc=g?'#76B900':'#3b82f6',lab=(x,y,s,c,tx)=>h('text',{x,y,textAnchor:'middle',fontSize:9,fill:c||'#94a3b8'},tx);
+ return h('svg',{viewBox:'0 -56 800 536',className:'w-full h-auto select-none',style:{'--fd':(2.4-2*f).toFixed(2)+'s','--fl':(2.6-2.1*f).toFixed(2)+'s'}},
+  h('rect',{x:30,y:20,width:740,height:420,rx:28,fill:'#0b1220',stroke:a.c,strokeWidth:2}),
+  h('text',{x:400,y:-46,textAnchor:'middle',fontSize:11,fill:hot},'Ventilasi belakang: udara panas keluar menjauhi keyboard'),
+  h('rect',{x:150,y:44,width:500,height:22,rx:3,fill:hot,fillOpacity:.12+.3*hk,stroke:'#475569'}),
+  h('path',{d:'M154 55H646',stroke:'#64748b',strokeWidth:18,strokeDasharray:'2 6',opacity:.6}),
+  ...[185,215,385,415,585,615].map(x=>h('g',{key:'h'+x},h('path',{d:`M${x} 44V-30`,className:'fl',stroke:hot,strokeWidth:2+2*f,opacity:.55+.45*f,fill:'none'}),h('path',{d:`M${x-6} -28L${x} -40L${x+6} -28Z`,fill:hot}))),
+  ...['M44 470V118H152','M756 470V118H648'].map((d,i)=>h('path',{key:'c'+i,d,className:'fl',stroke:'#22d3ee',strokeWidth:2+1.5*f,opacity:.4+.5*f,fill:'none'})),
+  h('text',{x:56,y:474,fontSize:10,fill:'#22d3ee'},'Udara dingin masuk dari bawah'),
+  ...PIPES.map((d,i)=>h('g',{key:'p'+i},h('path',{d,fill:'none',stroke:'#9a5a2e',strokeWidth:7,strokeLinecap:'round'}),h('path',{d,fill:'none',stroke:hot,strokeWidth:3,strokeLinecap:'round',opacity:.35+.55*hk}))),
+  fan(200,118,'f1'),fan(600,118,'f2'),
+  ln('M395 166H355V210',bal?'#22d3ee':'#334155',.9,1.5,'l1'),ln('M445 166H485V210',bal?'#22d3ee':'#334155',.9,1.5,'l2'),
+  ...(bal?[...dots('M395 166H355V210','#22d3ee',2,'a'),...dots('M445 166H485V210','#22d3ee',2,'b')]:[]),
+  ln('M150 226H270','#38bdf8',.5,1.5,'r1'),ln('M270 256H150','#a78bfa',.5,1.5,'r2'),ln('M285 310V343H170','#a78bfa',.5,1.5,'s1'),
+  ...dots('M150 226H270','#38bdf8',2,'rd1'),...dots('M270 256H150','#a78bfa',2,'rd2'),...dots('M285 310V343H170','#a78bfa',2,'sd'),
+  ln('M505 310V348H470',g?'#76B900':'#334155',g?.9:.5,2,'m1'),ln('M355 310V348H410',g?'#334155':'#3b82f6',g?.5:.9,2,'m2'),ln('M440 361V392',dc,.9,2.5,'m3'),
+  ...dots(g?'M505 310V348H470':'M355 310V348H410',dc,2,'md'),...dots('M440 361V392',dc,2,'ms'),
+  h('g',{style:{cursor:'pointer'},onClick:()=>pick('cpu')},
+   h('rect',{x:270,y:210,width:130,height:100,rx:8,fill:'#0b1220',stroke:heat(t.ct),strokeWidth:2.5,style:{filter:`drop-shadow(0 0 ${Math.max(0,(t.ct-38)/8)}px ${heat(t.ct)})`}}),
+   h('text',{x:335,y:224,textAnchor:'middle',fontSize:10,fill:'#38bdf8'},'Core i5-13450HX'),
+   ...t.p.map((v,i)=>h('rect',{key:'p'+i,x:278+(i%3)*28,y:232+Math.floor(i/3)*30,width:24,height:26,rx:3,fill:'#0071C5',fillOpacity:.15+.85*v})),
+   ...t.e.map((v,i)=>h('rect',{key:'e'+i,x:364+(i%2)*18,y:240+Math.floor(i/2)*20,width:16,height:16,rx:2,fill:'#22d3ee',fillOpacity:.15+.85*v})),
+   lab(318,303,0,0,`6 P-Core ${t.pc.toFixed(1)} GHz`),lab(381,303,0,0,'4 E-Core')),
+  h('g',{style:{cursor:'pointer'},onClick:()=>pick('gpu')},
+   h('rect',{x:440,y:210,width:130,height:100,rx:8,fill:'#0b1220',stroke:heat(t.gt),strokeWidth:2.5,style:{filter:`drop-shadow(0 0 ${Math.max(0,(t.gt-38)/8)}px ${heat(t.gt)})`}}),
+   h('text',{x:505,y:224,textAnchor:'middle',fontSize:10,fill:'#76B900'},'RTX 4050 6GB GDDR6'),
+   ...Array.from({length:15},(_,i)=>h('rect',{key:'t'+i,x:453+(i%5)*22,y:234+Math.floor(i/5)*20,width:16,height:14,rx:2,fill:'#76B900',className:g?'pu':'',style:g?{animationDelay:(i%5)*.12+'s'}:{},fillOpacity:g?.9:.2+.4*t.gu})),
+   lab(505,303,0,0,`Tensor Core, DLSS 3 ${g?'ON':'OFF'}`)),
+  h('g',{style:{cursor:'pointer'},onClick:()=>pick('la1')},
+   h('rect',{x:395,y:148,width:50,height:36,rx:5,fill:'#0b1220',stroke:bal?'#e2e8f0':'#334155',strokeWidth:2,className:bal?'pu':''}),
+   h('text',{x:420,y:170,textAnchor:'middle',fontSize:11,fontWeight:700,fill:bal?'#e2e8f0':'#64748b'},'LA1 AI')),
+  bal&&h('text',{key:'ae',x:420,y:140,textAnchor:'middle',fontSize:9,fill:'#22d3ee'},'AI Engine+'),
+  ...[0,1].map(i=>h('g',{key:'m'+i,style:{cursor:'pointer'},onClick:()=>pick('ram')},h('rect',{x:60,y:214+i*30,width:90,height:24,rx:4,fill:'#0b1220',stroke:'#38bdf8'}),lab(105,230+i*30,0,0,'DDR5 4800'))),
+  h('g',{style:{cursor:'pointer'},onClick:()=>pick('ssd')},h('rect',{x:60,y:330,width:110,height:26,rx:4,fill:'#0b1220',stroke:'#a78bfa'}),lab(115,347,0,0,'SSD NVMe PCIe 4.0')),
+  h('g',{style:{cursor:'pointer'},onClick:()=>pick('mux')},h('rect',{x:410,y:335,width:60,height:26,rx:5,fill:'#0b1220',stroke:dc,strokeWidth:2}),h('text',{x:440,y:352,textAnchor:'middle',fontSize:11,fontWeight:700,fill:dc},'MUX')),
+  lab(440,326,0,dc,g?'GPU langsung ke layar':'Optimus via iGPU'),
+  h('rect',{x:330,y:392,width:220,height:34,rx:6,fill:'#0b1220',stroke:g?'#76B900':'#475569'}),
+  h('text',{x:440,y:413,textAnchor:'middle',fontSize:11,fill:'#e2e8f0'},'Layar 15.6 inci FHD 144 Hz'),
+  h('text',{x:50,y:428,fontSize:10,fill:'#64748b'},'Area keyboard dan telapak tangan: tetap sejuk'),
+  sp('cpu',272,212,'#0071C5'),sp('gpu',568,212,'#76B900'),sp('la1',445,148,'#22d3ee'),sp('mux',470,335,dc),sp('ram',150,214,'#38bdf8'),sp('ssd',170,330,'#a78bfa'),sp('fan',160,78,a.c));
+}
+function Chart({d}){
+ const pts=d.map((v,i)=>`${(i*300/39).toFixed(1)},${(80-clamp(v,0,160)/160*80).toFixed(1)}`).join(' ');
+ return h('svg',{viewBox:'0 0 300 80',className:'w-full h-24'},h('line',{x1:0,x2:300,y1:8,y2:8,stroke:'#475569',strokeDasharray:'3 3'}),h('text',{x:2,y:6,fontSize:6,fill:'#64748b'},'144 Hz'),h('polygon',{points:`0,80 ${pts} 300,80`,fill:'#76B900',opacity:.15}),h('polyline',{points:pts,fill:'none',stroke:'#76B900',strokeWidth:1.8}));
+}
+const Panel=({t,children,className=''})=>h('section',{className:'rounded-2xl border border-slate-800 p-3 sm:p-4 '+className,style:{background:'#111827cc'}},t&&h('h2',{className:'text-sm font-semibold text-slate-300 mb-2'},t),children);
+const Btn=({on,c,onClick,children,sub})=>h('button',{onClick,className:'rounded-xl border px-3 py-2 text-left transition active:scale-95 flex-1',style:{borderColor:on?c:'#1e293b',background:on?c+'26':'#0b1220',boxShadow:on?`0 0 16px ${c}55`:'none'}},h('div',{className:'text-sm font-semibold',style:{color:on?c:'#cbd5e1'}},children),sub&&h('div',{className:'text-[11px] text-slate-400 mt-0.5'},sub));
+const Stat=({ic,l,v,u,sub,c,w})=>h('div',{className:'rounded-2xl border border-slate-800 p-3',style:{background:'#111827cc'}},h('div',{className:'flex items-center gap-1.5 text-xs text-slate-400'},h(Ic,{d:ic,c}),l),h('div',{className:'mono text-2xl font-bold mt-1',style:{color:c}},v,h('span',{className:'text-xs text-slate-400 ml-1'},u)),h('div',{className:'h-1.5 bg-slate-800 rounded mt-1.5 overflow-hidden'},h('div',{className:'h-full',style:{width:clamp(w,0,1)*100+'%',background:c,transition:'width .6s'}})),h('div',{className:'text-[11px] text-slate-400 mt-1'},sub));
+
+function App(){
+ const[mode,setMode]=useState('balance'),[load,setLoad]=useState('idle'),[sel,setSel]=useState(null);
+ const[tel,setTel]=useState(()=>({...calc('balance','idle'),h:Array(40).fill(144),p:[.1,.1,.1,.1,.1,.1],e:[.3,.3,.3,.3]}));
+ const cycle=()=>setMode(m=>({quiet:'balance',balance:'perf',perf:'quiet'}[m]));
+ useEffect(()=>{const id=setInterval(()=>{const t=calc(mode,load);setTel(s=>{const n={},r=Math.random,big=load==='game'?4:6;
+  for(const k in t)n[k]=lerp(s[k],t[k],.4);
+  n.p=[0,1,2,3,4,5].map(i=>clamp(t.cu*(i<big?1:.4)*(.7+.3*r()),.04,1));
+  n.e=[0,1,2,3].map(()=>clamp((load==='idle'?.3:.6)*(.5+.5*r()),.05,1));
+  n.h=[...s.h.slice(1),n.fps*(1+(r()-.5)*.08)];return n})},700);return()=>clearInterval(id)},[mode,load]);
+ useEffect(()=>{const k=e=>{if(e.key.toLowerCase()==='q'&&!e.ctrlKey&&!e.metaKey)cycle()};addEventListener('keydown',k);return()=>removeEventListener('keydown',k)},[]);
+ const a=M[mode],i=INFO[sel],bal=mode==='balance',tot=tel.cw+tel.gw;
+ return h('main',{className:'max-w-6xl mx-auto p-3 sm:p-5 space-y-3'},
+  h('header',{className:'flex flex-wrap items-end justify-between gap-2'},
+   h('div',null,h('h1',{className:'text-2xl sm:text-3xl font-bold'},'Lenovo LOQ 15IRX9'),h('p',{className:'text-sm text-slate-400'},'Bedah arsitektur performa dan sistem pendingin. Mode aktif: ',h('b',{style:{color:a.c}},a.n))),
+   h('div',{className:'flex flex-wrap gap-1.5 text-[11px] mono'},[['i5-13450HX','#0071C5'],['RTX 4050 6GB','#76B900'],['DDR5 4800','#38bdf8'],['NVMe PCIe 4.0','#a78bfa']].map(([x,c])=>h('span',{key:x,className:'px-2 py-1 rounded-full border',style:{borderColor:c,color:c}},x)))),
+  h('div',{className:'grid md:grid-cols-2 gap-3'},
+   h(Panel,{t:'Mode daya (Fn + Q)'},
+    h('div',{className:'flex gap-2'},Object.entries(M).map(([k,m])=>h(Btn,{key:k,on:mode===k,c:m.c,onClick:()=>setMode(k),sub:k==='quiet'?'Senyap':k==='balance'?'LA1 AI aktif':'Daya maksimal'},m.n.split(' ')[0]))),
+    h('div',{className:'flex items-center gap-2 mt-2'},h('button',{onClick:cycle,className:'mono text-xs px-2 py-1 rounded border border-slate-600 bg-slate-900 active:scale-95'},'Fn + Q'),h('p',{className:'text-xs text-slate-400'},a.d+' Tekan tombol Q di keyboard untuk ganti mode.'))),
+   h(Panel,{t:'Simulasi beban kerja'},h('div',{className:'flex gap-2'},Object.entries(L).map(([k,l])=>h(Btn,{key:k,on:load===k,c:'#76B900',onClick:()=>setLoad(k)},l.n))))),
+  h('div',{className:'grid lg:grid-cols-3 gap-3'},
+   h(Panel,{className:'lg:col-span-2',t:'Diagram X-Ray, tampak atas (belakang laptop di sisi atas)'},h(Diag,{tel,mode,load,sel,pick:setSel}),h('p',{className:'text-[11px] text-slate-500'},'Klik titik (i) atau komponen untuk penjelasan teknis. Angka adalah simulasi edukatif, bukan hasil pengukuran.')),
+   h(Panel,{t:'Detail komponen'},
+    i?h('div',{key:sel,className:'fi'},h('h3',{className:'font-semibold text-lg',style:{color:i.c}},i.t),h('p',{className:'text-sm text-slate-300 mt-1'},i.b),h('ul',{className:'mt-2 space-y-1 text-xs text-slate-400'},i.s.map(s=>h('li',{key:s},'▸ '+s)))):h('p',{className:'text-sm text-slate-400'},'Pilih komponen di diagram atau lewat tombol di bawah ini.'),
+    h('div',{className:'flex flex-wrap gap-1.5 mt-3'},Object.entries(INFO).map(([k,v])=>h('button',{key:k,onClick:()=>setSel(k),className:'text-[11px] px-2 py-1 rounded-full border',style:{borderColor:sel===k?v.c:'#334155',color:v.c}},v.k))))),
+  h('div',{className:'grid grid-cols-2 lg:grid-cols-4 gap-3'},
+   h(Stat,{ic:IC.cpu,l:'CPU',v:tel.cw.toFixed(0),u:'W',sub:`${tel.ct.toFixed(0)} °C, P-Core ${tel.pc.toFixed(1)} GHz`,c:heat(tel.ct),w:tel.cw/80}),
+   h(Stat,{ic:IC.zap,l:'GPU (TGP)',v:tel.gw.toFixed(0),u:'W',sub:`${tel.gt.toFixed(0)} °C, maks 105 W`,c:heat(tel.gt),w:tel.gw/105}),
+   h(Stat,{ic:IC.wind,l:'Kipas ganda',v:Math.round(tel.rpm/50)*50,u:'rpm',sub:'Hyperchamber',c:'#22d3ee',w:tel.fan}),
+   h(Stat,{ic:IC.gauge,l:'Frame rate',v:tel.fps.toFixed(0),u:'FPS',sub:load==='game'?'DLSS 3 Frame Generation: ON':'DLSS 3: siaga',c:'#76B900',w:tel.fps/150})),
+  h(Panel,{t:'Grafik FPS dan pembagian daya'},h(Chart,{d:tel.h}),
+   h('div',{className:'flex h-3 rounded overflow-hidden mt-2'},h('div',{style:{width:tel.cw/tot*100+'%',background:'#0071C5',transition:'width .6s'}}),h('div',{style:{width:tel.gw/tot*100+'%',background:'#76B900',transition:'width .6s'}})),
+   h('div',{className:'flex justify-between text-[11px] mono text-slate-400 mt-1'},h('span',null,`CPU ${tel.cw.toFixed(0)} W`),h('span',null,bal?(load==='game'?'LA1: daya ke GPU':load==='render'?'LA1: daya ke CPU':'LA1: mode hemat'):'Batas daya tetap'),h('span',null,`GPU ${tel.gw.toFixed(0)} W`))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script></body></html>
